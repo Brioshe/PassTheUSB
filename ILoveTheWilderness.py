@@ -11,15 +11,12 @@ pygame.font.init()
 infoObject = pygame.display.Info()
 screen = pygame.display.set_mode((infoObject.current_w, infoObject.current_h)) #fullscreen
 
-# Sprites
-man = pygame.image.load('sprite.png').convert_alpha()
-man = pygame.transform.scale_by(man, 0.45)
-
 # Fonts
-ComicSans = pygame.font.SysFont('Comic Sans MS', 30)
+fontText = pygame.font.SysFont('Segoe UI', 30)
 
 # Object properties
 player_pos = pygame.Vector2(screen.get_width() / 2, screen.get_height() /2) # Initial Position
+
 velocity = pygame.math.Vector2(0, 0)
 lookflag = False
 speed = 1
@@ -33,8 +30,15 @@ fade_speed = 0.75
 ########### PROPERTIES ###########
 
 # Background items
-background = pygame.image.load("backgroundtest.jpg")
+background = pygame.image.load("background.jpg")
+background = pygame.transform.scale_by(background, 1.50)
 bgBubble = pygame.image.load("bubble.png")
+
+# Music
+pygame.mixer.init()
+pygame.mixer.music.load("bgaudio.mp3")
+pygame.mixer.music.play(-1, 0, 0)
+pygame.mixer.music.set_volume(0.2)
 
 ########### CLASSES ###########
 
@@ -46,7 +50,7 @@ class FadeOneObject:
         self.done = False
         
         # Set randum radius
-        self.radius = random.randint(50, 300)
+        self.radius = random.randint(100, 400)
         
         # Scale image
         self.original_image = pygame.transform.smoothscale(bgBubble, (self.radius * 2, self.radius * 2))
@@ -69,24 +73,57 @@ class FadeOneObject:
         rect = image.get_rect(center=self.position)
         screen.blit(image,rect)        
 
+def fade_in(screen, duration = 3):
+    fade_surface = pygame.Surface((infoObject.current_w, infoObject.current_h))
+    fade_surface.fill(color=(0, 0, 0))
+    alpha = 255
+
+    # Fade loop
+    start_time = pygame.time.get_ticks()
+
+    while alpha > 0:
+        alpha -= fade_speed
+        fade_surface.set_alpha(alpha)
+
+        screen.blit(background, (0,0))
+        screen.blit(man, (player_pos.x - man.get_width()/2, player_pos.y-man.get_height()/2))
+        screen.blit(fade_surface, (0, 0))
+        
+        pygame.display.update()
+        clock.tick(60)
+
 ########### CLASSES ###########
 
 # Main game loop
 clock = pygame.time.Clock()
-running = True
 frame_count = 0
 circles = []
 
+########### FLAGS ###########
+
+debugFlag = False
+keyPressed = False
+
+########### FLAGS ###########
+
+# Sprites
+man = pygame.image.load('sprite.png').convert_alpha()
+man = pygame.transform.scale_by(man, 0.45)
+
+# Fade into game
+fade_in(screen,duration=5)
+
+running = True
 while running:
     # Get input
     keys = pygame.key.get_pressed()
-    
+        
     # Create background
     screen.blit(background, (0,0))
-    
+        
     if frame_count % spawn_interval == 0 and len(circles) < num_objects:
         circles.append(FadeOneObject())
-        
+            
     for circle in circles[:]:
         circle.update()
         circle.draw(screen)
@@ -105,13 +142,13 @@ while running:
 
     # Friction function
     if (velocity.x > 0):
-        velocity.x -= velocity.x/10
+        velocity.x -= 0.5
     if (velocity.y > 0):
-        velocity.y -= velocity.y/10
+        velocity.y -= 0.5
     if (velocity.x < 0):
-        velocity.x += velocity.x/10
+        velocity.x += 0.5
     if (velocity.y < 0):
-        velocity.y += velocity.y/10
+        velocity.y += 0.5
     
     # Velocity function
     if keys[pygame.K_LEFT]:
@@ -150,15 +187,37 @@ while running:
     rotated_rect = rotated_sprite.get_rect(center =(int(player_pos.x), int(player_pos.y)))
     
     screen.blit(rotated_sprite, rotated_rect.topleft)
-         
+        
     previous_x = player_pos.x
     
     ########### DEBUG TOOLS ###########
-    fps = clock.get_fps()
-    text_surface = ComicSans.render(
-        f"Position: ({int(player_pos.x)}, {int(player_pos.y)}), FPS: {int(fps)}",
-        False, "Black")
-    screen.blit(text_surface, (0,0))
+    # if event.type == pygame.KEYDOWN:
+    #     if event.key == pygame.K_p and not keyPressed:
+    #         debugFlag = not debugFlag  
+    #         keyPressed = True 
+
+    # if event.type == pygame.KEYUP:
+    #     if event.key == pygame.K_p:
+    #         keyPressed = False
+
+    debugFlag = True # Temporary Measure
+    if debugFlag == True:
+        #Background
+        rect_color = (0, 0, 0, 128)
+        rect_width = 300
+        rect_height = 200
+        rect_surface = pygame.Surface((rect_width, rect_height), pygame.SRCALPHA)
+        rect_surface.fill(rect_color)
+        screen.blit(rect_surface,(0,0))
+
+        # Text
+        fps = clock.get_fps()
+        text_line1 = fontText.render(f"Position: ({int(player_pos.x)}, {int(player_pos.y)})", False, "White") # Coordinates
+        text_line2 = fontText.render(f"FPS: {int(fps)}", False, "White") # FPS
+        text_line3 = fontText.render(f"Man Width: {int(man.get_width())}", False, "White") # Man Width
+        screen.blit(text_line1, (0,0))
+        screen.blit(text_line2, (0,(text_line1.get_height())))
+        screen.blit(text_line3, (0,(text_line1.get_height() * 2)))
     
     ########### DEBUG TOOLS ###########
     
