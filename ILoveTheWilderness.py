@@ -13,6 +13,7 @@ screen = pygame.display.set_mode((infoObject.current_w, infoObject.current_h)) #
 
 # Fonts
 fontText = pygame.font.SysFont('Segoe UI', 30)
+menuFont = pygame.font.Font('Fonts/Peignot.ttf', 30)
 
 # Object properties
 player_pos = pygame.Vector2(screen.get_width() / 2, screen.get_height() /2) # Initial Position
@@ -30,9 +31,9 @@ fade_speed = 0.75
 ########### PROPERTIES ###########
 
 # Background items
-background = pygame.image.load("background.jpg")
+background = pygame.image.load("Images/background.jpg")
 background = pygame.transform.scale_by(background, 1.50)
-bgBubble = pygame.image.load("bubble.png")
+bgBubble = pygame.image.load("Images/bubble.png")
 
 ########### CLASSES ###########
 
@@ -73,9 +74,9 @@ def fade_in(screen, duration):
     fade_surface.fill(color=(0, 0, 0))
     alpha = 255
     
-    pygame.mixer.music.load("PS2Start.mp3")
+    pygame.mixer.music.load("Audio/PS2Start.mp3")
     pygame.mixer.music.play(0, 0, 0)
-    pygame.mixer.music.set_volume(0.5)
+    pygame.mixer.music.set_volume(0.1)
 
     # Fade loop
     start_time = pygame.time.get_ticks()
@@ -88,10 +89,25 @@ def fade_in(screen, duration):
         screen.blit(man, (player_pos.x - man.get_width()/2, player_pos.y-man.get_height()/2))
         screen.blit(fade_surface, (0, 0))
         
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+                alpha = 0
         pygame.display.update()
         clock.tick(60)
 
 ########### CLASSES ###########
+
+########### FLAGS ###########
+
+debugFlag = True
+menuFlag = False
+gameMusicPaused = False
+menuMusicPaused = True
+
+########### FLAGS ###########
+
 
 # Main game loop
 clock = pygame.time.Clock()
@@ -99,20 +115,28 @@ frame_count = 0
 circles = []
 
 # Sprites
-man = pygame.image.load('sprite.png').convert_alpha()
+man = pygame.image.load('Images/sprite.png').convert_alpha()
 man = pygame.transform.scale_by(man, 0.45)
 
 # Fade into game
 fade_in(screen,duration = 10)
+pygame.mixer.music.fadeout(3)
 
 # Music
 pygame.mixer.init()
-pygame.mixer.music.load("bgaudio.mp3")
-pygame.mixer.music.play(-1, 0, 0)
-pygame.mixer.music.set_volume(0.40)
+
+defaultBGMusic = pygame.mixer.Sound("Audio/bgaudio.mp3")
+menuMusic = pygame.mixer.Sound("Audio/menuMusic.mp3")
+
+channel1 = pygame.mixer.Channel(0)
+channel2 = pygame.mixer.Channel(1)
+channel1.play(defaultBGMusic)
+
+channel1.set_volume(0.2)
 
 running = True
 while running:
+
     # Get input
     keys = pygame.key.get_pressed()
         
@@ -134,9 +158,35 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+        
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_ESCAPE:
+                menuFlag = not menuFlag
 
-    if keys[pygame.K_ESCAPE]:
-        running = False
+    while menuFlag == True:
+        screen.fill("Black")
+        if menuMusicPaused:
+            channel1.pause()
+            gameMusicPaused = True
+            channel2.play(menuMusic)
+            menuMusicPaused = False 
+            channel2.set_volume(0.2)
+        
+        for event in pygame.event.get():
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    menuFlag = not menuFlag
+        
+        pygame.display.flip()
+        clock.tick(60)
+
+    # Set settings
+    if menuFlag == False:
+        if gameMusicPaused == True:
+            menuMusicPaused = True
+            channel2.pause()
+            gameMusicPaused = False
+            channel1.unpause()
 
     # Friction function
     if (velocity.x > 0):
@@ -190,22 +240,23 @@ while running:
     
     ########### DEBUG TOOLS ###########
     
-    #Background
-    rect_color = (0, 0, 0, 128)
-    rect_width = 250
-    rect_height = 200
-    rect_surface = pygame.Surface((rect_width, rect_height), pygame.SRCALPHA)
-    rect_surface.fill(rect_color)
-    screen.blit(rect_surface,(0,0))
+    if debugFlag == True:
+        #Background
+        rect_color = (0, 0, 0, 128)
+        rect_width = 250
+        rect_height = 200
+        rect_surface = pygame.Surface((rect_width, rect_height), pygame.SRCALPHA)
+        rect_surface.fill(rect_color)
+        screen.blit(rect_surface,(0,0))
 
-    # Text
-    fps = clock.get_fps()
-    text_line1 = fontText.render(f"Position: ({int(player_pos.x)}, {int(player_pos.y)})", False, "White") # Coordinates
-    text_line2 = fontText.render(f"FPS: {int(fps)}", False, "White") # FPS
-    text_line3 = fontText.render(f"Man Width: {int(man.get_width())}", False, "White") # Man Width
-    screen.blit(text_line1, (0,0))
-    screen.blit(text_line2, (0,(text_line1.get_height())))
-    screen.blit(text_line3, (0,(text_line1.get_height() * 2)))
+        # Text
+        fps = clock.get_fps()
+        text_line1 = fontText.render(f"Position: ({int(player_pos.x)}, {int(player_pos.y)})", False, "White") # Coordinates
+        text_line2 = fontText.render(f"FPS: {int(fps)}", False, "White") # FPS
+        text_line3 = fontText.render(f"Man Width: {int(man.get_width())}", False, "White") # Man Width
+        screen.blit(text_line1, (0,0))
+        screen.blit(text_line2, (0,(text_line1.get_height())))
+        screen.blit(text_line3, (0,(text_line1.get_height() * 2)))
     
     ########### DEBUG TOOLS ###########
     
