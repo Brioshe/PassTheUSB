@@ -2,6 +2,9 @@
 import pygame
 import math
 import random
+import datetime
+import time
+from pyvidplayer2 import Video
 
 ########### PROPERTIES ###########
 
@@ -101,13 +104,25 @@ def fade_in(screen, duration):
 
 ########### FLAGS ###########
 
-debugFlag = True
 menuFlag = False
 gameMusicPaused = False
 menuMusicPaused = True
 
+tobuscusFlag = False
+
 ########### FLAGS ###########
 
+# Pyramid height factor
+pyramidHeight = 136.4
+
+# Dog Anomaly Understanding Statement (DAUS)
+dogPissFactor = False
+
+# Number determinator 00005
+integerNum = 0
+
+# Time previous
+previousTime = time.time()
 
 # Main game loop
 clock = pygame.time.Clock()
@@ -117,6 +132,8 @@ circles = []
 # Sprites
 man = pygame.image.load('Images/sprite.png').convert_alpha()
 man = pygame.transform.scale_by(man, 0.45)
+
+dog = pygame.image.load('Images/dogalert.png').convert_alpha()
 
 # Fade into game
 fade_in(screen,duration = 10)
@@ -162,6 +179,13 @@ while running:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 menuFlag = not menuFlag
+            if event.key == pygame.K_m:
+                tobuscusFlag = not tobuscusFlag
+
+    if tobuscusFlag == True:
+        vid = Video("video.mp4")
+
+        
 
     while menuFlag == True:
         screen.fill("Black")
@@ -173,9 +197,22 @@ while running:
             channel2.set_volume(0.2)
         
         for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     menuFlag = not menuFlag
+
+        pos = pygame.mouse.get_pos()
+        mousex = pos[0]
+
+        if (mousex < 1280):
+            screen.blit(dog, (infoObject.current_w - dog.get_width(), infoObject.current_h - dog.get_height()))
+
+        menuText1 = menuFont.render(f"FUCK SWEDEN", False, "White")
+
+        screen.blit(pygame.transform.scale_by(menuText1, 5), (infoObject.current_w / 2 - (menuText1.get_width() * 2.5) ,infoObject.current_h / 2 - (menuText1.get_height() * 2)))
         
         pygame.display.flip()
         clock.tick(60)
@@ -240,23 +277,63 @@ while running:
     
     ########### DEBUG TOOLS ###########
     
-    if debugFlag == True:
-        #Background
-        rect_color = (0, 0, 0, 128)
-        rect_width = 250
-        rect_height = 200
-        rect_surface = pygame.Surface((rect_width, rect_height), pygame.SRCALPHA)
-        rect_surface.fill(rect_color)
-        screen.blit(rect_surface,(0,0))
+    #Background
+    rect_color = (0, 0, 0, 128)
+    rect_width = 500
+    rect_height = 250
+    rect_surface = pygame.Surface((rect_width, rect_height), pygame.SRCALPHA)
+    rect_surface.fill(rect_color)
+    # screen.blit(rect_surface,(0,0))
 
-        # Text
-        fps = clock.get_fps()
-        text_line1 = fontText.render(f"Position: ({int(player_pos.x)}, {int(player_pos.y)})", False, "White") # Coordinates
-        text_line2 = fontText.render(f"FPS: {int(fps)}", False, "White") # FPS
-        text_line3 = fontText.render(f"Man Width: {int(man.get_width())}", False, "White") # Man Width
-        screen.blit(text_line1, (0,0))
-        screen.blit(text_line2, (0,(text_line1.get_height())))
-        screen.blit(text_line3, (0,(text_line1.get_height() * 2)))
+    # Text
+    fps = clock.get_fps()
+
+    # Display time
+    now = datetime.datetime.now()
+    current_time = now.strftime("%H:%M:%S")
+
+    # Solitude time
+    timeInSolitude = time.time()
+    if (timeInSolitude - previousTime >= 1):
+        solitude = random.randint(0,10000) / 100
+        previousTime = timeInSolitude
+
+    # Pyramid height detector
+    heightLootbox = random.randint(0,10000)
+    if (heightLootbox >= 9750):
+        pyramidHeight = 136.5
+    if (heightLootbox < 1000):
+        pyramidHeight = 136.4
+
+    integerNum = integerNum + 1
+
+    if (player_pos.x < 1280 and integerNum > 501):
+        dogPissFactor = True
+    if (player_pos.x >= 1280 and integerNum > 501):
+        dogPissFactor = False 
+
+    if (dogPissFactor == True):
+        screen.blit(dog, (infoObject.current_w - dog.get_width(), infoObject.current_h - dog.get_height()))
+
+    text_line1 = fontText.render(f"Position: ({int(player_pos.x)}, {int(player_pos.y)})", False, "White") # Coordinates
+    text_line2 = fontText.render(f"FPS: {int(fps)}", False, "White") # FPS
+    text_line3 = fontText.render(f"Man Width: {int(man.get_width())}", False, "White") # Man Width
+    text_line4 = fontText.render(f"Solitude Level: {solitude}%", False, "White")
+    text_line5 = fontText.render(f"Time: {current_time}", False, "White")
+    text_line6 = fontText.render(f"Height of the Pyramid of Khafre: {pyramidHeight} m", False, "White")
+    text_line7 = fontText.render(f"Rowan's phone number: 570-892-8261", False, "White")
+    text_line8 = fontText.render(f"Number of Integers: {integerNum}", False, "White")
+    text_line9 = fontText.render(f"DOGCON alert active: {dogPissFactor}", False, "White")
+
+    screen.blit(text_line1, (0,0))
+    screen.blit(text_line2, (0,(text_line1.get_height())))
+    screen.blit(text_line3, (0,(text_line1.get_height() * 2)))
+    screen.blit(text_line4, (0,(text_line1.get_height() * 3)))
+    screen.blit(text_line5, (0,(text_line1.get_height() * 4)))
+    screen.blit(text_line6, (0,(text_line1.get_height() * 5)))
+    screen.blit(text_line7, (0,(text_line1.get_height() * 6)))
+    screen.blit(text_line8, (0,(text_line1.get_height() * 7)))
+    screen.blit(text_line9, (0,(text_line1.get_height() * 8)))
     
     ########### DEBUG TOOLS ###########
     
