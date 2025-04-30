@@ -1,4 +1,10 @@
-# Example file showing a basic pygame "game loop"
+import os
+local_ffmpeg_path = os.path.join(os.getcwd(), "bin")
+os.environ["PATH"] = local_ffmpeg_path + os.pathsep + os.environ["PATH"]
+
+import subprocess
+subprocess.run(["ffmpeg", "-version"])
+
 import pygame
 import math
 import random
@@ -37,6 +43,9 @@ fade_speed = 0.75
 background = pygame.image.load("Images/background.jpg")
 background = pygame.transform.scale_by(background, 1.50)
 bgBubble = pygame.image.load("Images/bubble.png")
+
+tobBackground = pygame.image.load("Images/tobBackground.jpg")
+tobBackground = pygame.transform.scale_by(tobBackground, 3.5)
 
 ########### CLASSES ###########
 
@@ -183,10 +192,43 @@ while running:
                 tobuscusFlag = not tobuscusFlag
 
     if tobuscusFlag == True:
-        vid = Video("video.mp4")
+        vid = Video("Images/tob.mp4")
+        vid.set_volume(0.5)
+        vid.resize((960, 540))
 
+        channel1.stop()
+
+        # win = pygame.display.set_mode(vid.current_size)
+        pygame.display.set_caption(vid.name)
+        vid_pos = pygame.Vector2(100, 100);
+        vid_vel = pygame.Vector2(3, 2)
+
+        while vid.active:
+            screen.blit(tobBackground, (0,0))
+
+            key = None
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    vid.stop()
+                elif event.type == pygame.KEYDOWN:
+                    key = pygame.key.name(event.key)
+
+            if (vid_pos.x <= 0 or vid_pos.x + 960 >= infoObject.current_w):
+                vid_vel.x *= -1
+            if (vid_pos.y <= 0 or vid_pos.y + 540 >= infoObject.current_h):
+                vid_vel.y *= -1
+
+            vid_pos += vid_vel
+
+            if vid.draw(screen, (int(vid_pos.x), int(vid_pos.y)), force_draw=False):
+                pygame.display.update()
+                
+            pygame.time.wait(16)
+
+        vid.close();
+        pygame.quit();
         
-
     while menuFlag == True:
         screen.fill("Black")
         if menuMusicPaused:
