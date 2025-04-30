@@ -145,7 +145,7 @@ man = pygame.transform.scale_by(man, 0.45)
 dog = pygame.image.load('Images/dogalert.png').convert_alpha()
 
 # Fade into game
-fade_in(screen,duration = 10)
+#fade_in(screen,duration = 10)
 pygame.mixer.music.fadeout(3)
 
 # Music
