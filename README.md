@@ -28,7 +28,7 @@ After installing pyvidplayer2, you'll be required to install path variables. Ple
 ## Screenshots
 
 Incredibly Gameplay
-![Screenshot]("[Screenshots/screenshot1.jpg?raw=true](https://github.com/Brioshe/PassTheUSB/blob/main/Screenshots/screenshot1.png)")
+![Screenshot]("https://github.com/Brioshe/PassTheUSB/blob/main/Screenshots/screenshot1.png")
 
 Look at him go
 ![Screenshot]("https://github.com/Brioshe/PassTheUSB/blob/main/Screenshots/screenshot2.PNG")
