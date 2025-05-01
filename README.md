@@ -11,8 +11,14 @@ Game requires pyvidplayer2 to run, run the following in your local terminal:
 ```bash
   pip install pyvidplayer2
 ```
-    
-After installing pyvidplayer2, you'll be required to install path variables. Please install ffmpeg, ffplay, and ffprobe, and drag all three files into the "\bin" folder of the game.
+
+After installing pyvidplayer2, you'll need FFmpeg for movie mode to run, to download, go to this link:
+
+[ffmpeg Download](https://www.gyan.dev/ffmpeg/builds/)
+
+Once installation is complete, drag the bin folder from the extracted zip file into the root folder of the game.
+
+
 ## Authors
 
 - [@Brioshe](https://github.com/Brioshe)
